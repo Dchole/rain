@@ -1,6 +1,7 @@
 import { Raindrop } from "./raindrop.js";
 import { Lightning } from "./lightning.js";
 import { AudioManager } from "./audioManager.js";
+import { Ground } from "./ground.js";
 
 /**
  * Main rain animation class that manages the entire scene
@@ -11,6 +12,7 @@ export class RainScene {
   private raindrops: Raindrop[] = [];
   private lightning: Lightning;
   private audioManager: AudioManager;
+  private ground: Ground;
   private animationId: number = 0;
   private lastTime: number = 0;
 
@@ -38,6 +40,7 @@ export class RainScene {
     this.ctx = context;
     this.audioManager = new AudioManager();
     this.lightning = new Lightning(() => this.audioManager.playThunder());
+    this.ground = new Ground(canvas, context);
 
     // Set initial rain intensity based on level
     this.rainIntensity = this.baseRainCount * this.intensityLevel;
@@ -375,12 +378,23 @@ export class RainScene {
       this.lightning.update(this.canvas.width, this.canvas.height, deltaTime);
     }
 
+    // Update ground
+    this.ground.update(deltaTime);
+
     // Update raindrops
     if (this.rainEnabled) {
       this.raindrops.forEach(raindrop => {
         raindrop.update(this.canvas.height);
 
-        if (raindrop.isOutOfBounds(this.canvas.height)) {
+        // Check for ground collision
+        const groundY = this.ground.getGroundY();
+        if (raindrop.y + raindrop.length >= groundY) {
+          // Create splash effect at impact point
+          this.ground.addSplash(raindrop.x, groundY);
+          
+          // Reset raindrop
+          raindrop.reset(this.canvas.width);
+        } else if (raindrop.isOutOfBounds(this.canvas.height)) {
           raindrop.reset(this.canvas.width);
         }
       });
@@ -393,6 +407,9 @@ export class RainScene {
   private render(currentTime: number): void {
     // Draw background
     this.drawBackground(currentTime);
+
+    // Draw ground
+    this.ground.render();
 
     // Draw lightning flash effect
     if (this.lightningEnabled) {
