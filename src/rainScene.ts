@@ -15,7 +15,9 @@ export class RainScene {
   // Animation settings
   private rainEnabled: boolean = true;
   private lightningEnabled: boolean = true;
-  private rainIntensity: number = 200; // Number of raindrops
+  private intensityLevel: number = 1; // Rain level (1-10)
+  private baseRainCount: number = 100; // Base raindrops per level
+  private rainIntensity: number = 100; // Number of raindrops (will be set in constructor)
 
   // Background elements
   private stars: {
@@ -33,6 +35,9 @@ export class RainScene {
     }
     this.ctx = context;
     this.lightning = new Lightning();
+
+    // Set initial rain intensity based on level
+    this.rainIntensity = this.baseRainCount * this.intensityLevel;
 
     this.setupCanvas();
     this.createStars();
@@ -98,44 +103,113 @@ export class RainScene {
 
     toggleRainBtn?.addEventListener("click", () => {
       this.rainEnabled = !this.rainEnabled;
+      this.updateRainStatus();
     });
 
     toggleLightningBtn?.addEventListener("click", () => {
       this.lightningEnabled = !this.lightningEnabled;
+      this.updateLightningStatus();
     });
 
     increaseIntensityBtn?.addEventListener("click", () => {
-      this.changeRainIntensity(50);
+      this.changeIntensityLevel(1);
     });
 
     decreaseIntensityBtn?.addEventListener("click", () => {
-      this.changeRainIntensity(-50);
+      this.changeIntensityLevel(-1);
     });
+
+    // Initialize UI state
+    this.updateUI();
   }
 
   /**
-   * Change rain intensity
+   * Update UI status indicators and button states
    */
-  private changeRainIntensity(delta: number): void {
-    const newIntensity = Math.max(
-      50,
-      Math.min(500, this.rainIntensity + delta)
-    );
+  private updateUI(): void {
+    this.updateRainStatus();
+    this.updateLightningStatus();
+    this.updateIntensityDisplay();
+  }
 
-    if (newIntensity > this.rainIntensity) {
-      // Add more raindrops
-      const toAdd = newIntensity - this.rainIntensity;
-      for (let i = 0; i < toAdd; i++) {
-        this.raindrops.push(
-          new Raindrop(this.canvas.width, this.canvas.height)
-        );
+  /**
+   * Update rain status display and button
+   */
+  private updateRainStatus(): void {
+    const statusElement = document.getElementById("rainStatus");
+    const buttonElement = document.getElementById("toggleRain");
+
+    if (statusElement && buttonElement) {
+      if (this.rainEnabled) {
+        statusElement.textContent = "ON";
+        statusElement.className = "status-value active";
+        buttonElement.className = "control-btn active";
+      } else {
+        statusElement.textContent = "OFF";
+        statusElement.className = "status-value inactive";
+        buttonElement.className = "control-btn inactive";
       }
-    } else if (newIntensity < this.rainIntensity) {
-      // Remove raindrops
-      this.raindrops = this.raindrops.slice(0, newIntensity);
     }
+  }
 
-    this.rainIntensity = newIntensity;
+  /**
+   * Update lightning status display and button
+   */
+  private updateLightningStatus(): void {
+    const statusElement = document.getElementById("lightningStatus");
+    const buttonElement = document.getElementById("toggleLightning");
+
+    if (statusElement && buttonElement) {
+      if (this.lightningEnabled) {
+        statusElement.textContent = "ON";
+        statusElement.className = "status-value active";
+        buttonElement.className = "control-btn active";
+      } else {
+        statusElement.textContent = "OFF";
+        statusElement.className = "status-value inactive";
+        buttonElement.className = "control-btn inactive";
+      }
+    }
+  }
+
+  /**
+   * Update intensity level display
+   */
+  private updateIntensityDisplay(): void {
+    const statusElement = document.getElementById("intensityLevel");
+
+    if (statusElement) {
+      statusElement.textContent = `Level ${this.intensityLevel}`;
+      statusElement.className = "status-value intensity";
+    }
+  }
+
+  /**
+   * Change rain intensity level (1-10)
+   */
+  private changeIntensityLevel(delta: number): void {
+    const newLevel = Math.max(1, Math.min(10, this.intensityLevel + delta));
+
+    if (newLevel !== this.intensityLevel) {
+      this.intensityLevel = newLevel;
+      const newIntensity = this.baseRainCount * this.intensityLevel;
+
+      if (newIntensity > this.rainIntensity) {
+        // Add more raindrops
+        const toAdd = newIntensity - this.rainIntensity;
+        for (let i = 0; i < toAdd; i++) {
+          this.raindrops.push(
+            new Raindrop(this.canvas.width, this.canvas.height)
+          );
+        }
+      } else if (newIntensity < this.rainIntensity) {
+        // Remove raindrops
+        this.raindrops = this.raindrops.slice(0, newIntensity);
+      }
+
+      this.rainIntensity = newIntensity;
+      this.updateIntensityDisplay();
+    }
   }
 
   /**

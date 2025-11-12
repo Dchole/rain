@@ -29,21 +29,130 @@
         left: 20px;
         color: white;
         z-index: 10;
+        min-width: 200px;
       }
 
-      .controls button {
+      .status-display {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+      }
+
+      .status-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+        font-size: 14px;
+      }
+
+      .status-item:last-child {
+        margin-bottom: 0;
+      }
+
+      .label {
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .status-value {
+        font-weight: bold;
+        padding: 4px 8px;
+        border-radius: 4px;
+        min-width: 60px;
+        text-align: center;
+        transition: all 0.3s ease;
+      }
+
+      .status-value.active {
+        background: rgba(76, 175, 80, 0.3);
+        color: #4caf50;
+        border: 1px solid #4caf50;
+      }
+
+      .status-value.inactive {
+        background: rgba(244, 67, 54, 0.3);
+        color: #f44336;
+        border: 1px solid #f44336;
+      }
+
+      .status-value.intensity {
+        background: rgba(33, 150, 243, 0.3);
+        color: #2196f3;
+        border: 1px solid #2196f3;
+      }
+
+      .button-controls {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .control-btn {
         background: rgba(255, 255, 255, 0.2);
         border: 1px solid rgba(255, 255, 255, 0.3);
         color: white;
-        padding: 8px 12px;
-        margin: 5px;
-        border-radius: 4px;
+        padding: 10px 15px;
+        border-radius: 6px;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
       }
 
-      .controls button:hover {
+      .control-btn:hover {
         background: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+      }
+
+      .control-btn.active {
+        border-color: #4caf50;
+        box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
+      }
+
+      .control-btn.inactive {
+        border-color: #f44336;
+        box-shadow: 0 0 8px rgba(244, 67, 54, 0.3);
+      }
+
+      .control-btn:active {
+        transform: translateY(0);
+      }
+
+      /* Animation for status changes */
+      .status-value {
+        animation: statusUpdate 0.3s ease;
+      }
+
+      @keyframes statusUpdate {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.05);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      /* Pulsing effect for active elements */
+      .status-value.active {
+        animation: pulse 2s infinite;
+      }
+
+      @keyframes pulse {
+        0% {
+          box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
+        50% {
+          box-shadow: 0 0 20px rgba(76, 175, 80, 0.6);
+        }
+        100% {
+          box-shadow: 0 0 5px rgba(76, 175, 80, 0.3);
+        }
       }
 
       .info {
@@ -57,10 +166,29 @@
   </head>
   <body>
     <div class="controls">
-      <button id="toggleRain">Toggle Rain</button>
-      <button id="toggleLightning">Toggle Lightning</button>
-      <button id="increaseIntensity">More Rain</button>
-      <button id="decreaseIntensity">Less Rain</button>
+      <div class="status-display">
+        <div class="status-item">
+          <span class="label">Rain:</span>
+          <span id="rainStatus" class="status-value active">ON</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Lightning:</span>
+          <span id="lightningStatus" class="status-value active">ON</span>
+        </div>
+        <div class="status-item">
+          <span class="label">Intensity:</span>
+          <span id="intensityLevel" class="status-value">Level 1</span>
+        </div>
+      </div>
+
+      <div class="button-controls">
+        <button id="toggleRain" class="control-btn active">Toggle Rain</button>
+        <button id="toggleLightning" class="control-btn active">
+          Toggle Lightning
+        </button>
+        <button id="increaseIntensity" class="control-btn">More Rain</button>
+        <button id="decreaseIntensity" class="control-btn">Less Rain</button>
+      </div>
     </div>
 
     <canvas id="rainCanvas"></canvas>
