@@ -391,7 +391,7 @@ export class RainScene {
         if (raindrop.y + raindrop.length >= groundY) {
           // Create splash effect at impact point
           this.ground.addSplash(raindrop.x, groundY);
-          
+
           // Reset raindrop
           raindrop.reset(this.canvas.width);
         } else if (raindrop.isOutOfBounds(this.canvas.height)) {
