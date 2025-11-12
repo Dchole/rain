@@ -193,6 +193,25 @@ export class Ground {
    * Add ripple effect to a puddle
    */
   private addRipple(puddle: Puddle, x: number, y: number): void {
+    const isCompound = (puddle as any).isCompound;
+    let hitSmallerPart = false;
+
+    if (isCompound) {
+      // Determine which part of the compound puddle was hit
+      const mainLeft = puddle.x;
+      const mainRight = puddle.x + puddle.width;
+      const smallerWidth = (puddle as any).smallerWidth;
+      const overlapOffset = (puddle as any).overlapOffset;
+      const smallerLeft = puddle.x + overlapOffset;
+      const smallerRight = smallerLeft + smallerWidth;
+
+      const hitMain = x >= mainLeft && x <= mainRight;
+      const hitSmaller = x >= smallerLeft && x <= smallerRight;
+
+      // If it hits the smaller part but NOT the main part, it's exclusively in the smaller part
+      hitSmallerPart = hitSmaller && !hitMain;
+    }
+
     const puddleCenterX = puddle.x + puddle.width / 2;
     const waterSurfaceY = this.getGroundY() + 7; // Water surface position
 
@@ -212,7 +231,8 @@ export class Ground {
       radius: 0,
       opacity: 1,
       maxRadius: maxRadius, // Proportional to puddle size
-      time: 0
+      time: 0,
+      hitSmallerPart: hitSmallerPart
     });
 
     // Limit ripples per puddle
@@ -509,51 +529,39 @@ export class Ground {
           );
           this.ctx.stroke();
 
-          // For compound puddles, also draw ripple on the smaller overlapping part if close enough
-          if (puddleIsCompound) {
+          // For compound puddles, draw ripple on the correct part based on where it was hit
+          if (puddleIsCompound && ripple.hitSmallerPart && rippleScale <= 1.0) {
             const smallerWidth = (puddle as any).smallerWidth;
             const smallerHeight = (puddle as any).smallerHeight;
             const overlapOffset = (puddle as any).overlapOffset;
             const smallerCenterX = puddle.x + overlapOffset + smallerWidth / 2;
             const smallerCenterY = puddleCenterY;
 
-            // Check if ripple origin is closer to the smaller puddle part
-            const distToMain = Math.abs(
-              puddleCenterX + ripple.x - puddleCenterX
-            );
-            const distToSmaller = Math.abs(
-              puddleCenterX + ripple.x - smallerCenterX
-            );
+            // Scale smaller puddle ripples proportionally
+            const smallerSizeScale =
+              Math.sqrt(smallerWidth * smallerHeight) / 100;
+            const smallerRippleWidthRadius =
+              (smallerWidth / 2) * rippleScale * (0.6 + smallerSizeScale * 0.3);
+            const smallerRippleHeightRadius =
+              (smallerHeight / 2) *
+              rippleScale *
+              (0.6 + smallerSizeScale * 0.3);
 
-            if (distToSmaller < distToMain && rippleScale <= 1.0) {
-              // Scale smaller puddle ripples proportionally
-              const smallerSizeScale =
-                Math.sqrt(smallerWidth * smallerHeight) / 100;
-              const smallerRippleWidthRadius =
-                (smallerWidth / 2) *
-                rippleScale *
-                (0.6 + smallerSizeScale * 0.3);
-              const smallerRippleHeightRadius =
-                (smallerHeight / 2) *
-                rippleScale *
-                (0.6 + smallerSizeScale * 0.3);
-
-              if (smallerRippleWidthRadius > 1) {
-                this.ctx.strokeStyle = `rgba(190, 210, 245, ${
-                  ripple.opacity * 0.5
-                })`;
-                this.ctx.beginPath();
-                this.ctx.ellipse(
-                  smallerCenterX + ripple.x * 0.7, // Slightly different offset for smaller puddle
-                  smallerCenterY + ripple.y * 0.2,
-                  smallerRippleWidthRadius,
-                  smallerRippleHeightRadius,
-                  0,
-                  0,
-                  Math.PI * 2
-                );
-                this.ctx.stroke();
-              }
+            if (smallerRippleWidthRadius > 1) {
+              this.ctx.strokeStyle = `rgba(190, 210, 245, ${
+                ripple.opacity * 0.5
+              })`;
+              this.ctx.beginPath();
+              this.ctx.ellipse(
+                smallerCenterX + ripple.x * 0.7, // Slightly different offset for smaller puddle
+                smallerCenterY + ripple.y * 0.2,
+                smallerRippleWidthRadius,
+                smallerRippleHeightRadius,
+                0,
+                0,
+                Math.PI * 2
+              );
+              this.ctx.stroke();
             }
           }
         }
@@ -643,4 +651,5 @@ interface Ripple {
   opacity: number;
   maxRadius: number;
   time: number;
+  hitSmallerPart?: boolean; // For compound puddles - true if hit the smaller attached part
 }
