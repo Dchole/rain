@@ -1,0 +1,23 @@
+{
+  "name": "canvas-rain-night",
+  "version": "1.0.0",
+  "description": "HTML5 Canvas Rain Animation in TypeScript",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "serve": "python3 -m http.server 8000"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "@types/node": "^20.0.0"
+  },
+  "keywords": [
+    "canvas",
+    "animation",
+    "rain",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}

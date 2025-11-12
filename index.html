@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Night Rain Canvas Animation</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #0a0a0a;
+        overflow: hidden;
+        font-family: Arial, sans-serif;
+      }
+
+      canvas {
+        display: block;
+        background: linear-gradient(
+          to bottom,
+          #1a1a2e 0%,
+          #16213e 50%,
+          #0f3460 100%
+        );
+      }
+
+      .controls {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        color: white;
+        z-index: 10;
+      }
+
+      .controls button {
+        background: rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: white;
+        padding: 8px 12px;
+        margin: 5px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+
+      .controls button:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+
+      .info {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="controls">
+      <button id="toggleRain">Toggle Rain</button>
+      <button id="toggleLightning">Toggle Lightning</button>
+      <button id="increaseIntensity">More Rain</button>
+      <button id="decreaseIntensity">Less Rain</button>
+    </div>
+
+    <canvas id="rainCanvas"></canvas>
+
+    <div class="info">
+      <p>Night Rain Animation - HTML5 Canvas + TypeScript</p>
+      <p>Use controls to adjust the rain and lightning effects</p>
+    </div>
+
+    <script type="module" src="dist/main.js"></script>
+  </body>
+</html>
