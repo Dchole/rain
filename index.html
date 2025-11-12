@@ -30,6 +30,67 @@
         color: white;
         z-index: 10;
         min-width: 200px;
+        transition: all 0.3s ease;
+      }
+
+      .controls-header {
+        background: rgba(0, 0, 0, 0.4);
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .controls-title {
+        font-size: 14px;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.9);
+      }
+
+      .toggle-btn {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 16px;
+        cursor: pointer;
+        padding: 2px 6px;
+        border-radius: 4px;
+        transition: all 0.2s ease;
+      }
+
+      .toggle-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+      }
+
+      .controls-content {
+        overflow: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .controls.collapsed .controls-content {
+        max-height: 0;
+        opacity: 0;
+        margin-top: -10px;
+        pointer-events: none;
+      }
+
+      .controls.expanded .controls-content {
+        max-height: 1000px;
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      .controls-header:hover {
+        background: rgba(0, 0, 0, 0.6);
+      }
+
+      .toggle-btn {
+        transition: transform 0.2s ease;
       }
 
       .status-display {
@@ -242,60 +303,68 @@
     </style>
   </head>
   <body>
-    <div class="controls">
-      <div class="status-display">
-        <div class="status-item">
-          <span class="label">Rain:</span>
-          <span id="rainStatus" class="status-value active">ON</span>
-        </div>
-        <div class="status-item">
-          <span class="label">Lightning:</span>
-          <span id="lightningStatus" class="status-value active">ON</span>
-        </div>
-        <div class="status-item">
-          <span class="label">Intensity:</span>
-          <span id="intensityLevel" class="status-value">Level 1</span>
-        </div>
-        <div class="status-item">
-          <span class="label">Audio:</span>
-          <span id="audioStatus" class="status-value active">ON</span>
-        </div>
+    <div class="controls expanded" id="controlsPanel">
+      <div class="controls-header" id="controlsHeader">
+        <span class="controls-title">Rain Controls</span>
+        <button class="toggle-btn" id="toggleControls">▼</button>
       </div>
+      <div class="controls-content">
+        <div class="status-display">
+          <div class="status-item">
+            <span class="label">Rain:</span>
+            <span id="rainStatus" class="status-value active">ON</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Lightning:</span>
+            <span id="lightningStatus" class="status-value active">ON</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Intensity:</span>
+            <span id="intensityLevel" class="status-value">Level 1</span>
+          </div>
+          <div class="status-item">
+            <span class="label">Audio:</span>
+            <span id="audioStatus" class="status-value active">ON</span>
+          </div>
+        </div>
 
-      <div class="button-controls">
-        <button id="toggleRain" class="control-btn active">Toggle Rain</button>
-        <button id="toggleLightning" class="control-btn active">
-          Toggle Lightning
-        </button>
-        <button id="increaseIntensity" class="control-btn">More Rain</button>
-        <button id="decreaseIntensity" class="control-btn">Less Rain</button>
-        <button id="toggleAudio" class="control-btn active">
-          🔊 Toggle Audio
-        </button>
-        <div class="volume-control">
-          <label for="volumeSlider" class="volume-label">Volume:</label>
-          <input
-            type="range"
-            id="volumeSlider"
-            min="0"
-            max="100"
-            value="70"
-            class="volume-slider"
-          />
-          <span id="volumeDisplay" class="volume-display">70%</span>
+        <div class="button-controls">
+          <button id="toggleRain" class="control-btn active">
+            Toggle Rain
+          </button>
+          <button id="toggleLightning" class="control-btn active">
+            Toggle Lightning
+          </button>
+          <button id="increaseIntensity" class="control-btn">More Rain</button>
+          <button id="decreaseIntensity" class="control-btn">Less Rain</button>
+          <button id="toggleAudio" class="control-btn active">
+            🔊 Toggle Audio
+          </button>
+          <div class="volume-control">
+            <label for="volumeSlider" class="volume-label">Volume:</label>
+            <input
+              type="range"
+              id="volumeSlider"
+              min="0"
+              max="100"
+              value="70"
+              class="volume-slider"
+            />
+            <span id="volumeDisplay" class="volume-display">70%</span>
+          </div>
         </div>
       </div>
     </div>
 
     <canvas id="rainCanvas"></canvas>
 
-    <!-- <div class="info">
+    <div class="info">
       <p>Night Rain Animation - HTML5 Canvas + TypeScript</p>
       <p>Use controls to adjust the rain and lightning effects</p>
       <p id="audioInfo" class="audio-info">
         🎵 Click any button to enable audio
       </p>
-    </div> -->
+    </div>
 
     <script type="module" src="dist/main.js"></script>
   </body>

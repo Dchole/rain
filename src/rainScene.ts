@@ -118,6 +118,16 @@ export class RainScene {
       "volumeSlider"
     ) as HTMLInputElement;
 
+    // Controls toggle functionality
+    const controlsPanel = document.getElementById("controlsPanel");
+    const controlsHeader = document.getElementById("controlsHeader");
+    const toggleControlsBtn = document.getElementById("toggleControls");
+
+    // Toggle controls visibility
+    controlsHeader?.addEventListener("click", () => {
+      this.toggleControlsVisibility();
+    });
+
     toggleRainBtn?.addEventListener("click", async () => {
       // Enable audio context on first user interaction
       await this.audioManager.enableAudio();
@@ -275,6 +285,30 @@ export class RainScene {
     const audioInfo = document.getElementById("audioInfo");
     if (audioInfo) {
       audioInfo.style.display = "none";
+    }
+  }
+
+  /**
+   * Toggle controls panel visibility
+   */
+  private toggleControlsVisibility(): void {
+    const controlsPanel = document.getElementById("controlsPanel");
+    const toggleBtn = document.getElementById("toggleControls");
+
+    if (controlsPanel && toggleBtn) {
+      const isExpanded = controlsPanel.classList.contains("expanded");
+
+      if (isExpanded) {
+        // Collapse
+        controlsPanel.classList.remove("expanded");
+        controlsPanel.classList.add("collapsed");
+        toggleBtn.textContent = "▶";
+      } else {
+        // Expand
+        controlsPanel.classList.remove("collapsed");
+        controlsPanel.classList.add("expanded");
+        toggleBtn.textContent = "▼";
+      }
     }
   }
 
