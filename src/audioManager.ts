@@ -14,8 +14,8 @@ export class AudioManager {
   private isEnabled: boolean = true;
   private isRainPlaying: boolean = false;
   private masterVolume: number = 0.7;
-  private rainVolume: number = 0.5;
-  private thunderVolume: number = 0.8;
+  private rainVolume: number = 0.3; // Quieter rain to let thunder dominate
+  private thunderVolume: number = 3.5; // MUCH LOUDER thunder!
 
   constructor() {
     this.initializeAudioContext();
@@ -95,27 +95,62 @@ export class AudioManager {
   }
 
   /**
-   * Create procedural thunder sound buffers
+   * Create natural rumbling thunder sound buffers
    */
   private createThunderBuffers(): void {
     if (!this.audioContext) return;
 
+    const sampleRate = this.audioContext.sampleRate;
+
     for (let i = 0; i < 3; i++) {
-      const bufferSize = this.audioContext.sampleRate * (1 + i * 0.3); // Varying duration
-      const buffer = this.audioContext.createBuffer(
-        1,
-        bufferSize,
-        this.audioContext.sampleRate
-      );
+      const duration = 3 + i * 0.8; // 3-5.6 seconds of rumble
+      const bufferSize = Math.floor(sampleRate * duration);
+      const buffer = this.audioContext.createBuffer(1, bufferSize, sampleRate);
       const data = buffer.getChannelData(0);
 
-      // Generate thunder-like noise with envelope
+      // Generate natural thunder rumble
       for (let j = 0; j < bufferSize; j++) {
+        const time = j / sampleRate;
         const progress = j / bufferSize;
-        const envelope =
-          Math.exp(-progress * 2) *
-          (1 + Math.sin(progress * Math.PI * 8) * 0.3);
-        data[j] = (Math.random() * 2 - 1) * envelope * 0.3;
+
+        // Natural thunder envelope - quick crack then long rumble
+        let envelope;
+        if (progress < 0.05) {
+          // Initial crack
+          envelope = 1.0;
+        } else {
+          // Long rumbling decay
+          envelope = Math.exp(-(progress - 0.05) * 2.5) * 0.8;
+        }
+
+        // Base noise for natural rumble texture
+        let sample = (Math.random() * 2 - 1) * 0.4;
+
+        // Low-frequency rumble modulation (creates the rolling effect)
+        const rumbleFreq = 0.8 + Math.sin(time * 0.5) * 0.3; // Very slow modulation
+        const rumbleMod = Math.sin(time * Math.PI * 2 * rumbleFreq) * 0.6;
+        sample *= 1 + rumbleMod;
+
+        // Add some deeper bass texture
+        const bassRumble =
+          Math.sin(time * Math.PI * 2 * (40 + Math.sin(time) * 20)) * 0.3;
+        sample += bassRumble;
+
+        // Initial crack sound (only at the beginning)
+        if (progress < 0.1) {
+          const crack = (Math.random() * 2 - 1) * (1 - progress * 10) * 0.5;
+          sample += crack;
+        }
+
+        // Apply envelope and ensure natural sound
+        sample *= envelope;
+
+        // Boost the power for LOUD thunder
+        sample *= 1.4; // Significant amplitude boost
+        if (sample > 0.95) sample = 0.95 + (sample - 0.95) * 0.1;
+        if (sample < -0.95) sample = -0.95 + (sample + 0.95) * 0.1;
+
+        data[j] = sample * 0.9; // Much higher final volume
       }
 
       this.thunderBuffers.push(buffer);
@@ -173,7 +208,7 @@ export class AudioManager {
   }
 
   /**
-   * Play thunder sound
+   * Play natural rumbling thunder sound
    */
   public playThunder(): void {
     if (
@@ -190,23 +225,32 @@ export class AudioManager {
       );
       const buffer = this.thunderBuffers[randomIndex];
 
-      // Create source and gain nodes
+      // Create simple audio chain for natural sound
       const source = this.audioContext.createBufferSource();
       const gainNode = this.audioContext.createGain();
+      const lowPassFilter = this.audioContext.createBiquadFilter();
 
       source.buffer = buffer;
+
+      // Simple low-pass filter to emphasize the rumble
+      lowPassFilter.type = "lowpass";
+      lowPassFilter.frequency.value = 150; // Cut harsh highs, keep rumble
+      lowPassFilter.Q.value = 0.7;
+
+      // Set powerful volume
       gainNode.gain.value = this.thunderVolume;
 
-      // Connect: source -> gain -> masterGain
-      source.connect(gainNode);
+      // Simple chain: source -> filter -> gain -> master
+      source.connect(lowPassFilter);
+      lowPassFilter.connect(gainNode);
       if (this.masterGainNode) {
         gainNode.connect(this.masterGainNode);
       }
 
-      // Play thunder
+      // Play natural thunder rumble
       source.start();
 
-      console.log("⚡ Thunder played");
+      console.log("⚡ Natural thunder rumble!");
     } catch (error) {
       console.warn("Failed to play thunder:", error);
     }
