@@ -431,6 +431,54 @@ export class Ground {
       const puddleCenterY = puddleTop + puddle.height / 2;
       const puddleIsCompound = (puddle as any).isCompound;
 
+      // Save canvas state and create clipping path for this puddle
+      this.ctx.save();
+
+      // Create clipping path that matches the puddle shape exactly
+      this.ctx.beginPath();
+      if (puddleIsCompound) {
+        // Create clipping path for compound puddle (both main and smaller parts)
+        const smallerWidth = (puddle as any).smallerWidth;
+        const smallerHeight = (puddle as any).smallerHeight;
+        const overlapOffset = (puddle as any).overlapOffset;
+        const smallerCenterX = puddle.x + overlapOffset + smallerWidth / 2;
+        const smallerCenterY = puddleCenterY;
+
+        // Add main puddle to clipping path
+        this.ctx.ellipse(
+          puddleCenterX,
+          puddleCenterY,
+          puddle.width / 2,
+          puddle.height / 2,
+          0,
+          0,
+          Math.PI * 2
+        );
+
+        // Add smaller overlapping puddle to clipping path
+        this.ctx.ellipse(
+          smallerCenterX,
+          smallerCenterY,
+          smallerWidth / 2,
+          smallerHeight / 2,
+          0,
+          0,
+          Math.PI * 2
+        );
+      } else {
+        // Create clipping path for regular single puddle
+        this.ctx.ellipse(
+          puddleCenterX,
+          puddleCenterY,
+          puddle.width / 2,
+          puddle.height / 2,
+          0,
+          0,
+          Math.PI * 2
+        );
+      }
+      this.ctx.clip(); // Apply the clipping path
+
       puddle.ripples.forEach(ripple => {
         // Calculate ripple dimensions to match puddle shape proportionally
         const rippleScale = ripple.radius / ripple.maxRadius;
@@ -510,6 +558,9 @@ export class Ground {
           }
         }
       });
+
+      // Restore canvas state after drawing ripples for this puddle
+      this.ctx.restore();
     });
 
     this.ctx.restore();
