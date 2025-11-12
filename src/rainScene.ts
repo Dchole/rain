@@ -2,6 +2,7 @@ import { Raindrop } from "./raindrop.js";
 import { Lightning } from "./lightning.js";
 import { AudioManager } from "./audioManager.js";
 import { Ground } from "./ground.js";
+import { Guardrails } from "./guardrails.js";
 
 /**
  * Main rain animation class that manages the entire scene
@@ -13,6 +14,7 @@ export class RainScene {
   private lightning: Lightning;
   private audioManager: AudioManager;
   private ground: Ground;
+  private guardrails: Guardrails;
   private animationId: number = 0;
   private lastTime: number = 0;
 
@@ -41,6 +43,7 @@ export class RainScene {
     this.audioManager = new AudioManager();
     this.lightning = new Lightning(() => this.audioManager.playThunder());
     this.ground = new Ground(canvas, context);
+    this.guardrails = new Guardrails(canvas, context);
 
     // Set initial rain intensity based on level
     this.rainIntensity = this.baseRainCount * this.intensityLevel;
@@ -76,6 +79,7 @@ export class RainScene {
     this.createStars();
     this.createRain();
     this.ground.onCanvasResize();
+    this.guardrails.onCanvasResize();
   }
 
   /**
@@ -412,6 +416,9 @@ export class RainScene {
   private render(currentTime: number): void {
     // Draw background
     this.drawBackground(currentTime);
+
+    // Draw guardrails (behind ground)
+    this.guardrails.render();
 
     // Draw ground
     this.ground.render();
