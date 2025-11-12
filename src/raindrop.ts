@@ -98,16 +98,19 @@ export class Raindrop {
   draw(ctx: CanvasRenderingContext2D): void {
     ctx.save();
 
-    // Create gradient for raindrop
+    // Create gradient for raindrop (realistic: tail at top, heavy droplet at bottom)
     const gradient = ctx.createLinearGradient(
       this.x,
       this.y,
       this.x,
       this.y + this.length
     );
-    gradient.addColorStop(0, `rgba(173, 216, 230, ${this.opacity})`);
-    gradient.addColorStop(1, `rgba(135, 206, 235, 0)`);
+    gradient.addColorStop(0, `rgba(135, 206, 235, ${this.opacity * 0.1})`); // Top: very faint tail
+    gradient.addColorStop(0.3, `rgba(153, 221, 255, ${this.opacity * 0.4})`); // Upper middle: building up
+    gradient.addColorStop(0.7, `rgba(173, 216, 230, ${this.opacity * 0.8})`); // Lower middle: getting solid
+    gradient.addColorStop(1, `rgba(100, 149, 237, ${this.opacity})`);
 
+    // Draw the main raindrop line with gradient
     ctx.strokeStyle = gradient;
     ctx.lineWidth = this.width;
     ctx.lineCap = "round";
@@ -116,6 +119,12 @@ export class Raindrop {
     ctx.moveTo(this.x, this.y);
     ctx.lineTo(this.x, this.y + this.length);
     ctx.stroke();
+
+    // Add a slightly thicker droplet at the bottom for more realistic shape
+    ctx.fillStyle = `rgba(100, 149, 237, ${this.opacity * 0.8})`;
+    ctx.beginPath();
+    ctx.arc(this.x, this.y + this.length, this.width * 0.8, 0, Math.PI * 2);
+    ctx.fill();
 
     ctx.restore();
   }
