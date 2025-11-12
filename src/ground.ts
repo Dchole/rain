@@ -170,7 +170,8 @@ export class Ground {
         velocityY: -20 - Math.random() * 30, // Upward velocity with randomness
         life: 1.0, // Full life
         maxLife: 0.3 + Math.random() * 0.4, // 0.3-0.7 seconds
-        size: 1 + Math.random() * 2 // 1-3px size
+        size: 1 + Math.random() * 2, // 1-3px size
+        impactY: y // Remember the original impact position
       });
     }
 
@@ -232,8 +233,8 @@ export class Ground {
       // Update life
       splash.life -= (deltaTime * 0.001) / splash.maxLife;
 
-      // Remove if dead or too far below ground (allow particles starting below ground to animate)
-      return splash.life > 0 && splash.y < this.getGroundY() + 50;
+      // Remove if dead or if particle has fallen back to its original impact position
+      return splash.life > 0 && splash.y <= splash.impactY;
     });
 
     // Update ripples in all puddles
@@ -560,6 +561,7 @@ interface Splash {
   life: number; // 0-1, where 1 is full life
   maxLife: number; // Maximum life duration in seconds
   size: number;
+  impactY: number; // Original Y position where raindrop hit
 }
 
 /**
