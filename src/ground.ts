@@ -213,7 +213,9 @@ export class Ground {
     }
 
     const puddleCenterX = puddle.x + puddle.width / 2;
-    const waterSurfaceY = this.getGroundY() + 7; // Water surface position
+    const groundY = this.getGroundY();
+    const puddleTop = groundY + 5; // Puddles start 5px below ground
+    const puddleCenterY = puddleTop + puddle.height / 2;
 
     // Calculate proportional max radius based on puddle size
     // Use the smaller dimension to ensure ripples stay within puddle bounds
@@ -224,10 +226,10 @@ export class Ground {
       avgPuddleSize * 0.6
     );
 
-    // Create ripple at impact point relative to puddle center
+    // Create ripple at impact point relative to puddle center (using both X and Y)
     puddle.ripples.push({
       x: x - puddleCenterX,
-      y: 0, // Ripples spread on surface, not vertically
+      y: y - puddleCenterY, // Use actual Y impact position relative to puddle center
       radius: 0,
       opacity: 1,
       maxRadius: maxRadius, // Proportional to puddle size
