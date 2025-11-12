@@ -389,10 +389,13 @@ export class RainScene {
 
         // Check for ground collision - let raindrops penetrate below ground surface
         const groundY = this.ground.getGroundY();
-        const penetrationDepth = 25; // Allow raindrops to go 25px below ground before collision
+        const maxPuddleHeight = this.ground.getMaxPuddleHeight();
+        const penetrationDepth = maxPuddleHeight + 5; // Use puddle depth range for collision
         if (raindrop.y + raindrop.length >= groundY + penetrationDepth) {
-          // Create splash effect at actual raindrop position (below ground surface)
-          this.ground.addSplash(raindrop.x, raindrop.y + raindrop.length);
+          // Create splash effect at random depth within puddle range
+          const randomDepth = 5 + Math.random() * maxPuddleHeight; // Random depth from 5px to full puddle depth
+          const splashY = groundY + randomDepth;
+          this.ground.addSplash(raindrop.x, splashY);
 
           // Reset raindrop
           raindrop.reset(this.canvas.width);

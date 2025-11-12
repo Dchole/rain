@@ -22,6 +22,14 @@ export class Ground {
   }
 
   /**
+   * Get the maximum puddle height (depth) for collision calculations
+   */
+  public getMaxPuddleHeight(): number {
+    if (this.puddles.length === 0) return 20; // Default depth if no puddles
+    return Math.max(...this.puddles.map(p => p.height));
+  }
+
+  /**
    * Recalculate puddle positions when canvas is resized
    */
   public onCanvasResize(): void {
