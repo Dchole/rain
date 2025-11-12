@@ -75,6 +75,7 @@ export class RainScene {
     // Recreate elements when canvas is resized
     this.createStars();
     this.createRain();
+    this.ground.onCanvasResize();
   }
 
   /**
@@ -386,11 +387,12 @@ export class RainScene {
       this.raindrops.forEach(raindrop => {
         raindrop.update(this.canvas.height);
 
-        // Check for ground collision
+        // Check for ground collision - let raindrops penetrate below ground surface
         const groundY = this.ground.getGroundY();
-        if (raindrop.y + raindrop.length >= groundY) {
-          // Create splash effect at impact point
-          this.ground.addSplash(raindrop.x, groundY);
+        const penetrationDepth = 25; // Allow raindrops to go 25px below ground before collision
+        if (raindrop.y + raindrop.length >= groundY + penetrationDepth) {
+          // Create splash effect at actual raindrop position (below ground surface)
+          this.ground.addSplash(raindrop.x, raindrop.y + raindrop.length);
 
           // Reset raindrop
           raindrop.reset(this.canvas.width);
