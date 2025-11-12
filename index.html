@@ -155,12 +155,89 @@
         }
       }
 
+      /* Volume control styling */
+      .volume-control {
+        display: flex;
+        align-items: center;
+        margin-top: 10px;
+        padding: 8px 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        gap: 8px;
+      }
+
+      .volume-label {
+        font-size: 12px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        min-width: 50px;
+      }
+
+      .volume-slider {
+        flex: 1;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        outline: none;
+        cursor: pointer;
+      }
+
+      .volume-slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #4caf50;
+        cursor: pointer;
+        box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+        transition: all 0.2s ease;
+      }
+
+      .volume-slider::-webkit-slider-thumb:hover {
+        background: #66bb6a;
+        box-shadow: 0 0 8px rgba(76, 175, 80, 0.7);
+      }
+
+      .volume-slider::-moz-range-thumb {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #4caf50;
+        cursor: pointer;
+        border: none;
+        box-shadow: 0 0 4px rgba(76, 175, 80, 0.5);
+      }
+
+      .volume-display {
+        font-size: 12px;
+        color: #4caf50;
+        font-weight: bold;
+        min-width: 35px;
+        text-align: right;
+      }
+
       .info {
         position: absolute;
         bottom: 20px;
         left: 20px;
         color: rgba(255, 255, 255, 0.7);
         font-size: 12px;
+      }
+
+      .audio-info {
+        color: #ffc107;
+        font-weight: 500;
+        animation: fadeInOut 2s infinite;
+      }
+
+      @keyframes fadeInOut {
+        0%,
+        100% {
+          opacity: 0.7;
+        }
+        50% {
+          opacity: 1;
+        }
       }
     </style>
   </head>
@@ -179,6 +256,10 @@
           <span class="label">Intensity:</span>
           <span id="intensityLevel" class="status-value">Level 1</span>
         </div>
+        <div class="status-item">
+          <span class="label">Audio:</span>
+          <span id="audioStatus" class="status-value active">ON</span>
+        </div>
       </div>
 
       <div class="button-controls">
@@ -188,6 +269,21 @@
         </button>
         <button id="increaseIntensity" class="control-btn">More Rain</button>
         <button id="decreaseIntensity" class="control-btn">Less Rain</button>
+        <button id="toggleAudio" class="control-btn active">
+          🔊 Toggle Audio
+        </button>
+        <div class="volume-control">
+          <label for="volumeSlider" class="volume-label">Volume:</label>
+          <input
+            type="range"
+            id="volumeSlider"
+            min="0"
+            max="100"
+            value="70"
+            class="volume-slider"
+          />
+          <span id="volumeDisplay" class="volume-display">70%</span>
+        </div>
       </div>
     </div>
 
@@ -196,6 +292,9 @@
     <div class="info">
       <p>Night Rain Animation - HTML5 Canvas + TypeScript</p>
       <p>Use controls to adjust the rain and lightning effects</p>
+      <p id="audioInfo" class="audio-info">
+        🎵 Click any button to enable audio
+      </p>
     </div>
 
     <script type="module" src="dist/main.js"></script>

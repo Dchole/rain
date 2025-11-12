@@ -1,5 +1,6 @@
 import { Raindrop } from "./raindrop.js";
 import { Lightning } from "./lightning.js";
+import { AudioManager } from "./audioManager.js";
 
 /**
  * Main rain animation class that manages the entire scene
@@ -9,6 +10,7 @@ export class RainScene {
   private ctx: CanvasRenderingContext2D;
   private raindrops: Raindrop[] = [];
   private lightning: Lightning;
+  private audioManager: AudioManager;
   private animationId: number = 0;
   private lastTime: number = 0;
 
@@ -34,7 +36,8 @@ export class RainScene {
       throw new Error("Could not get 2D context from canvas");
     }
     this.ctx = context;
-    this.lightning = new Lightning();
+    this.audioManager = new AudioManager();
+    this.lightning = new Lightning(() => this.audioManager.playThunder());
 
     // Set initial rain intensity based on level
     this.rainIntensity = this.baseRainCount * this.intensityLevel;
@@ -43,6 +46,12 @@ export class RainScene {
     this.createStars();
     this.createRain();
     this.setupEventListeners();
+
+    // Start rain audio if enabled
+    if (this.rainEnabled) {
+      // Note: Audio will only start after user interaction due to browser policies
+      this.audioManager.startRain();
+    }
   }
 
   /**
@@ -100,23 +109,54 @@ export class RainScene {
     const toggleLightningBtn = document.getElementById("toggleLightning");
     const increaseIntensityBtn = document.getElementById("increaseIntensity");
     const decreaseIntensityBtn = document.getElementById("decreaseIntensity");
+    const toggleAudioBtn = document.getElementById("toggleAudio");
+    const volumeSlider = document.getElementById(
+      "volumeSlider"
+    ) as HTMLInputElement;
 
-    toggleRainBtn?.addEventListener("click", () => {
+    toggleRainBtn?.addEventListener("click", async () => {
+      // Enable audio context on first user interaction
+      await this.audioManager.enableAudio();
+      this.hideAudioInfo();
+
       this.rainEnabled = !this.rainEnabled;
+
+      if (this.rainEnabled) {
+        this.audioManager.startRain();
+      } else {
+        this.audioManager.stopRain();
+      }
+
       this.updateRainStatus();
     });
 
-    toggleLightningBtn?.addEventListener("click", () => {
+    toggleLightningBtn?.addEventListener("click", async () => {
+      await this.enableAudioAndStartRain();
       this.lightningEnabled = !this.lightningEnabled;
       this.updateLightningStatus();
     });
 
-    increaseIntensityBtn?.addEventListener("click", () => {
+    increaseIntensityBtn?.addEventListener("click", async () => {
+      await this.enableAudioAndStartRain();
       this.changeIntensityLevel(1);
     });
 
-    decreaseIntensityBtn?.addEventListener("click", () => {
+    decreaseIntensityBtn?.addEventListener("click", async () => {
+      await this.enableAudioAndStartRain();
       this.changeIntensityLevel(-1);
+    });
+
+    toggleAudioBtn?.addEventListener("click", async () => {
+      await this.enableAudioAndStartRain();
+      this.audioManager.toggleAudio();
+      this.updateAudioStatus();
+    });
+
+    volumeSlider?.addEventListener("input", async event => {
+      await this.enableAudioAndStartRain();
+      const volume = parseFloat((event.target as HTMLInputElement).value);
+      this.audioManager.setMasterVolume(volume);
+      this.updateVolumeDisplay();
     });
 
     // Initialize UI state
@@ -130,6 +170,8 @@ export class RainScene {
     this.updateRainStatus();
     this.updateLightningStatus();
     this.updateIntensityDisplay();
+    this.updateAudioStatus();
+    this.updateVolumeDisplay();
   }
 
   /**
@@ -185,6 +227,67 @@ export class RainScene {
   }
 
   /**
+   * Update audio status display and button
+   */
+  private updateAudioStatus(): void {
+    const statusElement = document.getElementById("audioStatus");
+    const buttonElement = document.getElementById("toggleAudio");
+    const audioState = this.audioManager.getState();
+
+    if (statusElement && buttonElement) {
+      if (audioState.enabled) {
+        statusElement.textContent = "ON";
+        statusElement.className = "status-value active";
+        buttonElement.className = "control-btn active";
+        buttonElement.textContent = "🔊 Toggle Audio";
+      } else {
+        statusElement.textContent = "OFF";
+        statusElement.className = "status-value inactive";
+        buttonElement.className = "control-btn inactive";
+        buttonElement.textContent = "🔇 Toggle Audio";
+      }
+    }
+  }
+
+  /**
+   * Update volume display
+   */
+  private updateVolumeDisplay(): void {
+    const volumeSlider = document.getElementById(
+      "volumeSlider"
+    ) as HTMLInputElement;
+    const volumeDisplay = document.getElementById("volumeDisplay");
+
+    if (volumeSlider && volumeDisplay) {
+      const volume = parseInt(volumeSlider.value);
+      volumeDisplay.textContent = `${volume}%`;
+    }
+  }
+
+  /**
+   * Hide audio activation info message
+   */
+  private hideAudioInfo(): void {
+    const audioInfo = document.getElementById("audioInfo");
+    if (audioInfo) {
+      audioInfo.style.display = "none";
+    }
+  }
+
+  /**
+   * Enable audio and start rain if it should be playing
+   */
+  private async enableAudioAndStartRain(): Promise<void> {
+    await this.audioManager.enableAudio();
+    this.hideAudioInfo();
+
+    // Start rain audio if rain is enabled but not playing
+    if (this.rainEnabled && !this.audioManager.getState().rainPlaying) {
+      this.audioManager.startRain();
+    }
+  }
+
+  /**
    * Change rain intensity level (1-10)
    */
   private changeIntensityLevel(delta: number): void {
@@ -208,6 +311,7 @@ export class RainScene {
       }
 
       this.rainIntensity = newIntensity;
+      this.audioManager.updateRainIntensity(this.intensityLevel);
       this.updateIntensityDisplay();
     }
   }

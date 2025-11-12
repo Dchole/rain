@@ -9,8 +9,10 @@ export class Lightning {
   private branches: LightningBranch[] = [];
   private lastStrike: number = 0;
   private nextStrikeDelay: number = 0;
+  private onStrikeCallback?: () => void;
 
-  constructor() {
+  constructor(onStrikeCallback?: () => void) {
+    this.onStrikeCallback = onStrikeCallback;
     this.scheduleNextStrike();
   }
 
@@ -80,6 +82,12 @@ export class Lightning {
     this.createBranches(canvasWidth, canvasHeight);
     this.lastStrike = Date.now();
     this.scheduleNextStrike();
+
+    // Call the strike callback (for thunder sound)
+    if (this.onStrikeCallback) {
+      // Add slight delay for realism (light travels faster than sound)
+      setTimeout(this.onStrikeCallback, 100 + Math.random() * 300);
+    }
   }
 
   /**
