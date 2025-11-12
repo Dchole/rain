@@ -5,8 +5,8 @@ export class Guardrails {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
   private posts: GuardrailPost[] = [];
-  private railHeight: number = 50; // Taller posts for highway guardrails
-  private postSpacing: number = 150; // Distance between posts
+  private railHeight: number = 200; // Much taller posts
+  private postSpacing: number = 500; // Fewer posts, more spacing
 
   constructor(canvas: HTMLCanvasElement, ctx: CanvasRenderingContext2D) {
     this.canvas = canvas;
@@ -42,7 +42,7 @@ export class Guardrails {
         x: x,
         y: railY,
         height: this.railHeight,
-        width: 8,
+        width: 20, // Much thicker posts for close-up scene
         weathering: Math.random() * 0.3 + 0.1 // Random weathering amount
       });
     }
@@ -69,8 +69,8 @@ export class Guardrails {
   private drawContinuousRail(): void {
     if (this.posts.length === 0) return;
 
-    const railY = this.posts[0].y + 15; // Position rail higher up the taller posts
-    const railHeight = 8; // Slightly thicker rail for better proportion    // Main rail - metallic gray with gradient
+    const railY = this.posts[0].y + 60; // Position rail higher up the much taller posts
+    const railHeight = 18; // Keep rail thickness, just taller posts    // Main rail - metallic gray with gradient
     const railGradient = this.ctx.createLinearGradient(
       0,
       railY,
